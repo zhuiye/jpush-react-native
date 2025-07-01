@@ -1,25 +1,51 @@
 
 package cn.jiguang.plugins.push;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import com.facebook.react.ReactPackage;
+import androidx.annotation.Nullable;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.module.model.ReactModuleInfo;
+import com.facebook.react.module.model.ReactModuleInfoProvider;
+import com.facebook.react.TurboReactPackage;
 import com.facebook.react.uimanager.ViewManager;
 
-public class JPushPackage implements ReactPackage {
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+public class JPushPackage extends TurboReactPackage {
+
+    @Nullable
     @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new JPushModule(reactContext));
+    public NativeModule getModule(String name, ReactApplicationContext reactContext) {
+        if (name.equals(JPushModuleImpl.NAME)) {
+            return new JPushModule(reactContext);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+    public ReactModuleInfoProvider getReactModuleInfoProvider() {
+        return () -> {
+            final Map<String, ReactModuleInfo> moduleInfos = new HashMap<>();
+            boolean isTurboModule = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
+            moduleInfos.put(
+                    JPushModuleImpl.NAME,
+                    new ReactModuleInfo(
+                            JPushModuleImpl.NAME,
+                            JPushModuleImpl.NAME,
+                            false, // canOverrideExistingModule
+                            false, // needsEagerInit
+                            true, // hasConstants
+                            false, // isCxxModule
+                            isTurboModule // isTurboModule
+            ));
+            return moduleInfos;
+        };
     }
 
 }

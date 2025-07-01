@@ -1,3 +1,5 @@
+
+
 #import <Foundation/Foundation.h>
 
 #if __has_include(<React/RCTBridge.h>)
@@ -13,12 +15,21 @@
 #import "JPUSHService.h"
 #import "RCTJPushEventQueue.h"
 
+
 #define J_APNS_NOTIFICATION_ARRIVED_EVENT  @"J_APNS_NOTIFICATION_ARRIVED_EVENT"
 #define J_APNS_NOTIFICATION_OPENED_EVENT   @"J_APNS_NOTIFICATION_OPENED_EVENT"
 #define J_LOCAL_NOTIFICATION_ARRIVED_EVENT @"J_LOCAL_NOTIFICATION_ARRIVED_EVENT"
 #define J_LOCAL_NOTIFICATION_OPENED_EVENT  @"J_LOCAL_NOTIFICATION_OPENED_EVENT"
 #define J_CUSTOM_NOTIFICATION_EVENT        @"J_CUSTOM_NOTIFICATION_EVENT"
 
-@interface RCTJPushModule : RCTEventEmitter <RCTBridgeModule>
 
+#ifdef RCT_NEW_ARCH_ENABLED
+
+#import <RNJPushSpec/RNJPushSpec.h>
+@interface RCTJPushModule: NSObject <NativeJpushSpec>
+
+
+#else
+  @interface RCTJPushModule : RCTEventEmitter <RCTBridgeModule>
+#endif
 @end

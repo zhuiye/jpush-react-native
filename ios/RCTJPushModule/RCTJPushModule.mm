@@ -62,10 +62,12 @@
 #define MOBILE_NUMBER_EVENT       @"MobileNumberEvent"
 
 
+#if RCT_NEW_ARCH_ENABLED
+#import <RNJPushSpec/RNJPushSpec.h>
+#endif
+
 @interface RCTJPushModule ()
-
 @end
-
 @implementation RCTJPushModule
 
 RCT_EXPORT_MODULE(JPushModule);
@@ -147,15 +149,23 @@ RCT_EXPORT_METHOD(setupWithConfig:(NSDictionary *)params)
                if (@available(iOS 12.0, *)) {
                  entity.types = JPAuthorizationOptionAlert|JPAuthorizationOptionBadge|JPAuthorizationOptionSound|JPAuthorizationOptionProvidesAppNotificationSettings;
                }
-               [JPUSHService registerForRemoteNotificationConfig:entity delegate:[[UIApplication sharedApplication] delegate]];
-               [launchOptions objectForKey: UIApplicationLaunchOptionsRemoteNotificationKey];
-               // 自定义消息
-               NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-               [defaultCenter addObserver:[[UIApplication sharedApplication] delegate] selector:@selector(networkDidReceiveMessage:) name:kJPFNetworkDidReceiveMessageNotification object:nil];
+               // 注册通知代理
+               id<JPUSHRegisterDelegate> jpushDelegate = (id<JPUSHRegisterDelegate>)[UIApplication sharedApplication].delegate;
+               [JPUSHService registerForRemoteNotificationConfig:entity delegate:jpushDelegate];
+
                // 地理围栏
-               [JPUSHService registerLbsGeofenceDelegate:[[UIApplication sharedApplication] delegate] withLaunchOptions:launchOptions];
+               id<JPUSHGeofenceDelegate> geofenceDelegate = (id<JPUSHGeofenceDelegate>)[UIApplication sharedApplication].delegate;
+               [JPUSHService registerLbsGeofenceDelegate:geofenceDelegate withLaunchOptions:launchOptions];
+
+               // 自定义消息监听
+               [[NSNotificationCenter defaultCenter] addObserver:[UIApplication sharedApplication].delegate
+                                                        selector:@selector(networkDidReceiveMessage:)
+                                                            name:kJPFNetworkDidReceiveMessageNotification
+                                                          object:nil];
+
                // 应用内消息
-               [JPUSHService setInAppMessageDelegate:self];
+               id<JPUSHInAppMessageDelegate> inAppDelegate = (id<JPUSHInAppMessageDelegate>)[UIApplication sharedApplication].delegate;
+               [JPUSHService setInAppMessageDelegate:inAppDelegate];
            });
 
            NSMutableArray *notificationList = [RCTJPushEventQueue sharedInstance]._notificationQueue;
@@ -168,6 +178,71 @@ RCT_EXPORT_METHOD(setupWithConfig:(NSDictionary *)params)
            }
        }
 }
+
+// specs...
+RCT_EXPORT_METHOD(stopPush)
+{}
+
+
+// specs...
+RCT_EXPORT_METHOD(resumePush)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(isPushStopped:(RCTResponseSenderBlock) callback)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setChannel:(NSDictionary *)params)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setChannelAndSound:(NSDictionary *)params)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setLinkMergeEnable:(BOOL )enable)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setDataInsightsEnable:(BOOL )enable)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setGeofenceEnable:(BOOL )enable)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setPushTime:(BOOL )enable)
+{}
+
+// specs...
+RCT_EXPORT_METHOD(setSilenceTime:(BOOL )enable)
+{}
+
+RCT_EXPORT_METHOD(setLatestNotificationNumber:(NSDictionary *)params)
+{}
+
+RCT_EXPORT_METHOD(setPowerSaveMode:(BOOL )enable)
+{}
+
+RCT_EXPORT_METHOD(requestPermission)
+{}
+
+
+
+RCT_EXPORT_METHOD(clearAllNotifications)
+{}
+
+
+RCT_EXPORT_METHOD(clearNotificationById)
+{}
+
+
+
+
+
+
 
 
 RCT_EXPORT_METHOD(loadJS)
@@ -182,7 +257,7 @@ RCT_EXPORT_METHOD(loadJS)
     }
 }
 
-RCT_EXPORT_METHOD(getRegisterId:(RCTResponseSenderBlock) callback)
+RCT_EXPORT_METHOD(getRegistrationID:(RCTResponseSenderBlock) callback)
 {
     [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
         NSMutableDictionary *response = [[NSMutableDictionary alloc] init];
@@ -265,7 +340,7 @@ RCT_EXPORT_METHOD(getAllTags:(NSDictionary *)params)
     } seq:sequence];
 }
 
-RCT_EXPORT_METHOD(validTag:(NSDictionary *)params)
+RCT_EXPORT_METHOD(checkTagBindState:(NSDictionary *)params)
 {
     if(params[TAG]){
         NSString *tag = params[TAG];
@@ -403,18 +478,17 @@ RCT_EXPORT_METHOD(setSmartPushEnable:(BOOL )enable)
 }
 
 //badge 角标
-RCT_EXPORT_METHOD(setBadge:(NSDictionary *)params)
+RCT_EXPORT_METHOD(setBadgeNumber:(NSDictionary *)params)
 {
-    if(params[BADGE]){
-        NSNumber *number = params[BADGE];
-        if(number < 0) return;
-        [JPUSHService setBadge:[number integerValue]];
+    NSNumber *badge = params[BADGE];
+    if ([badge isKindOfClass:[NSNumber class]] && [badge integerValue] >= 0) {
+        [JPUSHService setBadge:[badge integerValue]];
     }
-    if (params[APP_BADGE]) {
-        NSNumber *number = params[APP_BADGE];
-        if(number < 0) return;
+
+    NSNumber *appBadge = params[APP_BADGE];
+    if ([appBadge isKindOfClass:[NSNumber class]] && [appBadge integerValue] >= 0) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [UIApplication sharedApplication].applicationIconBadgeNumber = [number integerValue];
+            [UIApplication sharedApplication].applicationIconBadgeNumber = [appBadge integerValue];
         });
     }
 }
@@ -442,13 +516,13 @@ RCT_EXPORT_METHOD(setMobileNumber:(NSDictionary *)params)
 }
 
 //崩溃日志统计
-RCT_EXPORT_METHOD(crashLogON:(NSDictionary *)params)
+RCT_EXPORT_METHOD(initCrashHandler:(NSDictionary *)params)
 {
     [JPUSHService crashLogON];
 }
 
 //本地通知
-RCT_EXPORT_METHOD(addNotification:(NSDictionary *)params)
+RCT_EXPORT_METHOD(addLocalNotification:(NSDictionary *)params)
 {
     NSString *messageID = params[MESSAGE_ID]?params[MESSAGE_ID]:@"";
     JPushNotificationContent *content = [[JPushNotificationContent alloc] init];
@@ -490,7 +564,7 @@ RCT_EXPORT_METHOD(addNotification:(NSDictionary *)params)
     [JPUSHService addNotification:request];
 }
 
-RCT_EXPORT_METHOD(removeNotification:(NSDictionary *)params)
+RCT_EXPORT_METHOD(removeLocalNotification:(NSDictionary *)params)
 {
     NSString *requestIdentifier = params[MESSAGE_ID];
     if ([requestIdentifier isKindOfClass:[NSString class]]) {
@@ -509,19 +583,24 @@ RCT_EXPORT_METHOD(clearLocalNotifications)
 }
 
 //地理围栏
-RCT_EXPORT_METHOD(removeGeofenceWithIdentifier:(NSDictionary *)params)
+RCT_EXPORT_METHOD(deleteGeofence:(NSDictionary *)params)
 {
     if(params[GEO_FENCE_ID]){
         [JPUSHService removeGeofenceWithIdentifier:params[GEO_FENCE_ID]];
     }
 }
 
-RCT_EXPORT_METHOD(setGeofeneceMaxCount:(NSDictionary *)params)
+RCT_EXPORT_METHOD(setMaxGeofenceNumber:(NSDictionary *)params)
 {
     if(params[GEO_FENCE_MAX_NUMBER]){
         [JPUSHService setGeofeneceMaxCount:[params[GEO_FENCE_MAX_NUMBER] integerValue]];
     }
 }
+
+- (void)clearNotificationById:(NSDictionary *)map { 
+   
+}
+
 
 //事件处理
 - (NSArray<NSString *> *)supportedEvents
@@ -730,5 +809,16 @@ RCT_EXPORT_METHOD(setGeofeneceMaxCount:(NSDictionary *)params)
     };
     return result;
 }
+
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeJpushSpecJSI>(params);
+}
+#endif
+
+
 
 @end

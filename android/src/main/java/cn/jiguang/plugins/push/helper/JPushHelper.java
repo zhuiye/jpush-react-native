@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.Set;
 
-import cn.jiguang.plugins.push.JPushModule;
+import cn.jiguang.plugins.push.JPushModuleImpl;
 import cn.jiguang.plugins.push.common.JConstants;
 import cn.jiguang.plugins.push.common.JLogger;
 import cn.jpush.android.api.CustomMessage;
@@ -26,7 +26,7 @@ public class JPushHelper {
 
     public static void sendEvent(String eventName, WritableMap params) {
         try {
-            JPushModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+            JPushModuleImpl.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
         }catch (Throwable throwable){
             JLogger.e("sendEvent error:"+throwable.getMessage());
         }

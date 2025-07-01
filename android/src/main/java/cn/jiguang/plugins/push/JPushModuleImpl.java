@@ -36,29 +36,26 @@ import cn.jpush.android.api.JPushInterface;
 import cn.jpush.android.data.JPushCollectControl;
 import cn.jpush.android.data.JPushLocalNotification;
 
-public class JPushModule extends ReactContextBaseJavaModule {
+public class JPushModuleImpl  {
+
 
     public static ReactApplicationContext reactContext;
 
     public static boolean isAppForeground = false;
 
-    public JPushModule(ReactApplicationContext reactApplicationContext) {
-        super(reactContext);
+    public static final String NAME = "JPushModule";
+
+    public JPushModuleImpl(ReactApplicationContext reactApplicationContext) {
         reactContext = reactApplicationContext;
     }
 
-    @Override
-    public String getName() {
-        return "JPushModule";
-    }
+    
 
-    @ReactMethod
     public void setDebugMode(boolean enable) {
         JPushInterface.setDebugMode(enable);
         JLogger.setLoggerEnable(enable);
     }
 
-    @ReactMethod
     public void init() {
         JPushInterface.init(reactContext);
         if (JPushBroadcastReceiver.NOTIFICATION_BUNDLE != null) {
@@ -69,17 +66,14 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.setNotificationCallBackEnable(reactContext,true);
     }
 
-    @ReactMethod
     public void stopPush() {
         JPushInterface.stopPush(reactContext);
     }
 
-    @ReactMethod
     public void resumePush() {
         JPushInterface.resumePush(reactContext);
     }
 
-    @ReactMethod
     public void isPushStopped(Callback callback) {
         boolean isPushStopped = JPushInterface.isPushStopped(reactContext);
         if (callback == null) {
@@ -89,7 +83,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         callback.invoke(isPushStopped);
     }
 
-    @ReactMethod
     public void setChannel(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -102,7 +95,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
             JPushInterface.setChannel(reactContext, channel);
         }
     }
-    @ReactMethod
+
     public void setChannelAndSound(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -128,27 +121,23 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }catch (Throwable throwable){
         }
     }
-    @ReactMethod
+
     public void setLinkMergeEnable(boolean enable) {
         JPushInterface.setLinkMergeEnable(reactContext, enable);
     }
 
-    @ReactMethod
     public void setSmartPushEnable(boolean enable) {
         JPushInterface.setSmartPushEnable(reactContext, enable);
     }
 
-    @ReactMethod
     public void setDataInsightsEnable(boolean enable) {
         JPushInterface.setDataInsightsEnable(reactContext, enable);
     }
 
-    @ReactMethod
     public void setGeofenceEnable(boolean enable) {
         JPushInterface.setGeofenceEnable(reactContext, enable);
     }
 
-    @ReactMethod
     public void setCollectControl(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -188,7 +177,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
             JPushInterface.setCollectControl(reactContext, builder.build());
         }
     }
-    @ReactMethod
+
     public void setBadgeNumber(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -201,7 +190,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
             JLogger.w("there are no " + JConstants.BADGE_NUMBER);
         }
     }
-    @ReactMethod
+
     public void setPushTime(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -226,7 +215,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.setPushTime(reactContext, days, startHour, endHour);
     }
 
-    @ReactMethod
+
     public void setSilenceTime(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -243,7 +232,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.setSilenceTime(reactContext, startHour, startMinute, endHour, endMinute);
     }
 
-    @ReactMethod
     public void getRegistrationID(Callback callback) {
         if (callback == null) {
             JLogger.w(JConstants.CALLBACK_NULL);
@@ -255,7 +243,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         callback.invoke(writableMap);
     }
 
-    @ReactMethod
     public void getUdid(Callback callback) {
         if (callback == null) {
             JLogger.w(JConstants.CALLBACK_NULL);
@@ -265,7 +252,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         callback.invoke(udid);
     }
 
-    @ReactMethod
     public void setLatestNotificationNumber(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -279,7 +265,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
     public void setDefaultPushNotificationBuilder(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -289,7 +274,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.setDefaultPushNotificationBuilder(builder);
     }
 
-    @ReactMethod
     public void filterValidTags(ReadableMap readableMap, Callback callback) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -307,7 +291,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
             JLogger.w("there are no " + JConstants.TAGS);
         }
     }
-    @ReactMethod
+
     public void setProperties(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -323,7 +307,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
             JLogger.w("there are no " + JConstants.PROPERTIES);
         }
     }
-    @ReactMethod
+
     public void deleteProperties(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -340,7 +324,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
 
     }
-    @ReactMethod
+
     public void cleanProperties(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -349,7 +333,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         int sequence = readableMap.getInt(JConstants.SEQUENCE);
         JPushInterface.cleanProperties(reactContext,sequence);
     }
-    @ReactMethod
+
     public void setTags(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -369,7 +353,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
     public void addTags(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -389,7 +372,6 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
     public void deleteTags(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -409,7 +391,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
+   
     public void cleanTags(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -419,7 +401,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.cleanTags(reactContext, sequence);
     }
 
-    @ReactMethod
+   
     public void getAllTags(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -429,7 +411,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.getAllTags(reactContext, sequence);
     }
 
-    @ReactMethod
+   
     public void checkTagBindState(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -440,7 +422,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.checkTagBindState(reactContext, sequence, tag);
     }
 
-    @ReactMethod
+   
     public void setAlias(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -451,7 +433,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.setAlias(reactContext, sequence, alias);
     }
 
-    @ReactMethod
+   
     public void deleteAlias(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -461,7 +443,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.deleteAlias(reactContext, sequence);
     }
 
-    @ReactMethod
+   
     public void getAlias(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -471,7 +453,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.getAlias(reactContext, sequence);
     }
 
-    @ReactMethod
+   
     public void setMobileNumber(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -482,32 +464,32 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.setMobileNumber(reactContext, sequence, mobileNumber);
     }
 
-    @ReactMethod
+   
     public void onResume() {
         JPushInterface.onResume(reactContext);
     }
 
-    @ReactMethod
+   
     public void onPause() {
         JPushInterface.onPause(reactContext);
     }
 
-    @ReactMethod
+   
     public void onKillProcess() {
         JPushInterface.onKillProcess(reactContext);
     }
 
-    @ReactMethod
+   
     public void initCrashHandler() {
         JPushInterface.initCrashHandler(reactContext);
     }
 
-    @ReactMethod
+   
     public void stopCrashHandler() {
         JPushInterface.stopCrashHandler(reactContext);
     }
 
-    @ReactMethod
+   
     public void addLocalNotification(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -542,7 +524,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         JPushInterface.addLocalNotification(reactContext, notification);
     }
 
-    @ReactMethod
+   
     public void removeLocalNotification(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -561,17 +543,17 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
+   
     public void clearLocalNotifications() {
         JPushInterface.clearLocalNotifications(reactContext);
     }
 
-    @ReactMethod
+   
     public void requestPermission() {
         JPushInterface.requestPermission(reactContext);
     }
 
-    @ReactMethod
+   
     public void setGeofenceInterval(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -585,7 +567,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
+   
     public void setMaxGeofenceNumber(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -599,7 +581,7 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
+   
     public void deleteGeofence(ReadableMap readableMap) {
         if (readableMap == null) {
             JLogger.w(JConstants.PARAMS_NULL);
@@ -613,12 +595,12 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
+   
     public void clearAllNotifications(){
         JPushInterface.clearAllNotifications(reactContext);
     }
 
-    @ReactMethod
+   
     public void clearNotificationById(ReadableMap readableMap){
         if (readableMap == null){
             JLogger.w(JConstants.PARAMS_NULL);
@@ -632,12 +614,12 @@ public class JPushModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
+   
     public void setPowerSaveMode(boolean bool){
         JPushInterface.setPowerSaveMode(reactContext,bool);
     }
 
-    @ReactMethod
+   
     public void isNotificationEnabled(Callback callback){
         Integer isEnabled = JPushInterface.isNotificationEnabled(reactContext);
         if (callback == null){

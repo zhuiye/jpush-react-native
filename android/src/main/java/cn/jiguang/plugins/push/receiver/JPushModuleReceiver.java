@@ -5,7 +5,7 @@ import android.content.Context;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 
-import cn.jiguang.plugins.push.JPushModule;
+import cn.jiguang.plugins.push.JPushModuleImpl;
 import cn.jiguang.plugins.push.common.JLogger;
 import cn.jiguang.plugins.push.common.JConstants;
 import cn.jiguang.plugins.push.helper.JPushHelper;
@@ -43,8 +43,8 @@ public class JPushModuleReceiver extends JPushMessageReceiver {
   @Override
   public void onNotifyMessageOpened(Context context, NotificationMessage notificationMessage) {
     JLogger.d("onNotifyMessageOpened:" + notificationMessage.toString());
-    if (JPushModule.reactContext != null) {
-      if (!JPushModule.isAppForeground) JPushHelper.launchApp(context);
+    if (JPushModuleImpl.reactContext != null) {
+      if (!JPushModuleImpl.isAppForeground) JPushHelper.launchApp(context);
       WritableMap writableMap = JPushHelper.convertNotificationToMap(JConstants.NOTIFICATION_OPENED, notificationMessage);
       JPushHelper.sendEvent(JConstants.NOTIFICATION_EVENT, writableMap);
     } else {
@@ -54,8 +54,8 @@ public class JPushModuleReceiver extends JPushMessageReceiver {
   @Override
   public void onInAppMessageShow(Context context, NotificationMessage notificationMessage) {
     JLogger.d("onInAppMessageShow:" + notificationMessage.toString());
-    if (JPushModule.reactContext != null) {
-      if (!JPushModule.isAppForeground) JPushHelper.launchApp(context);
+    if (JPushModuleImpl.reactContext != null) {
+      if (!JPushModuleImpl.isAppForeground) JPushHelper.launchApp(context);
       WritableMap writableMap = JPushHelper.convertInAppMessageToMap(JConstants.IN_APP_MESSAGE_SHOW, notificationMessage);
       JPushHelper.sendEvent(JConstants.INAPP_MESSAGE_EVENT, writableMap);
     } else {
@@ -65,8 +65,8 @@ public class JPushModuleReceiver extends JPushMessageReceiver {
   @Override
   public void onInAppMessageClick(Context context, NotificationMessage notificationMessage) {
     JLogger.d("onInAppMessageClick:" + notificationMessage.toString());
-    if (JPushModule.reactContext != null) {
-      if (!JPushModule.isAppForeground) JPushHelper.launchApp(context);
+    if (JPushModuleImpl.reactContext != null) {
+      if (!JPushModuleImpl.isAppForeground) JPushHelper.launchApp(context);
       WritableMap writableMap = JPushHelper.convertInAppMessageToMap(JConstants.IN_APP_MESSAGE_CLICK, notificationMessage);
       JPushHelper.sendEvent(JConstants.INAPP_MESSAGE_EVENT, writableMap);
     } else {
