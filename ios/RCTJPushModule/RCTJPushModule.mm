@@ -1,6 +1,6 @@
 #import "RCTJPushModule.h"
 #import <CoreLocation/CoreLocation.h>
-
+#import <React/RCTBridge.h>
 //常量
 #define CODE           @"code"
 #define BADGE          @"badge"
@@ -69,6 +69,7 @@
 @interface RCTJPushModule ()
 @end
 @implementation RCTJPushModule
+@synthesize bridge;
 
 RCT_EXPORT_MODULE(JPushModule);
 
@@ -144,28 +145,22 @@ RCT_EXPORT_METHOD(setupWithConfig:(NSDictionary *)params)
                                  channel:params[@"channel"] apsForProduction:[params[@"production"] boolValue]];
 
            dispatch_async(dispatch_get_main_queue(), ^{
-               // APNS
+//                 APNS
                JPUSHRegisterEntity * entity = [[JPUSHRegisterEntity alloc] init];
                if (@available(iOS 12.0, *)) {
                  entity.types = JPAuthorizationOptionAlert|JPAuthorizationOptionBadge|JPAuthorizationOptionSound|JPAuthorizationOptionProvidesAppNotificationSettings;
                }
-               // 注册通知代理
-               id<JPUSHRegisterDelegate> jpushDelegate = (id<JPUSHRegisterDelegate>)[UIApplication sharedApplication].delegate;
-               [JPUSHService registerForRemoteNotificationConfig:entity delegate:jpushDelegate];
-
+               
+               [JPUSHService registerForRemoteNotificationConfig:entity delegate:(id<JPUSHRegisterDelegate>)[[UIApplication sharedApplication] delegate]];
+               [launchOptions objectForKey: UIApplicationLaunchOptionsRemoteNotificationKey];
+               // 自定义消息
+               NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+               [defaultCenter addObserver:[[UIApplication sharedApplication] delegate] selector:@selector(networkDidReceiveMessage:) name:kJPFNetworkDidReceiveMessageNotification object:nil];
                // 地理围栏
-               id<JPUSHGeofenceDelegate> geofenceDelegate = (id<JPUSHGeofenceDelegate>)[UIApplication sharedApplication].delegate;
-               [JPUSHService registerLbsGeofenceDelegate:geofenceDelegate withLaunchOptions:launchOptions];
-
-               // 自定义消息监听
-               [[NSNotificationCenter defaultCenter] addObserver:[UIApplication sharedApplication].delegate
-                                                        selector:@selector(networkDidReceiveMessage:)
-                                                            name:kJPFNetworkDidReceiveMessageNotification
-                                                          object:nil];
-
+               [JPUSHService registerLbsGeofenceDelegate:(id<JPUSHGeofenceDelegate>)[UIApplication sharedApplication].delegate
+                                       withLaunchOptions:launchOptions];
                // 应用内消息
-               id<JPUSHInAppMessageDelegate> inAppDelegate = (id<JPUSHInAppMessageDelegate>)[UIApplication sharedApplication].delegate;
-               [JPUSHService setInAppMessageDelegate:inAppDelegate];
+               [JPUSHService setInAppMessageDelegate:self];
            });
 
            NSMutableArray *notificationList = [RCTJPushEventQueue sharedInstance]._notificationQueue;
