@@ -26,10 +26,10 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 
 #import <RNJPushSpec/RNJPushSpec.h>
-@interface RCTJPushModule: NSObject <NativeJpushSpec>
+@interface RCTJPushModule: RCTEventEmitter <NativeJpushSpec,JPUSHInAppMessageDelegate>
 
 
 #else
-  @interface RCTJPushModule : RCTEventEmitter <RCTBridgeModule>
+  @interface RCTJPushModule : RCTEventEmitter <RCTBridgeModule,JPUSHInAppMessageDelegate>
 #endif
 @end
